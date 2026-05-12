@@ -1,0 +1,1 @@
+node_modules/\n__pycache__/\n.env\n*.pyc\n.venv/\ndist/\nbuild/\n.DS_Store\n*.db\n*.sqlite3\n.vscode/\n.idea/\nfrontend/out/\nfrontend/.next/
