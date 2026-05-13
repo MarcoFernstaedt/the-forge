@@ -3,6 +3,7 @@ const nextConfig = {
   output: 'export',
   distDir: 'dist',
   assetPrefix: '.',
+  basePath: '/forge',
   images: { unoptimized: true },
 };
 

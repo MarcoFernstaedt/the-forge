@@ -1,33 +1,38 @@
+"""SQLAlchemy models."""
+import json
 from datetime import datetime, timezone
-from sqlalchemy import create_engine, Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, UniqueConstraint
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, Text, UniqueConstraint
+from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from app.models.base import Base
 
 
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    username = Column(String, unique=True, nullable=False)
+    username = Column(String, unique=True, nullable=False, index=True)
     display_name = Column(String, nullable=True)
-    api_key = Column(String, unique=True, nullable=True)
+    api_key = Column(String, unique=True, nullable=True, index=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    last_active = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     trees = relationship("SkillTree", back_populates="user", cascade="all, delete-orphan")
     progress = relationship("UserProgress", back_populates="user", cascade="all, delete-orphan")
     activities = relationship("Activity", back_populates="user", cascade="all, delete-orphan")
+    obsidian_links = relationship("ObsidianLink", back_populates="user", cascade="all, delete-orphan")
 
 
 class SkillTree(Base):
     __tablename__ = "skill_trees"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True, index=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=True)
     is_template = Column(Boolean, default=False)
+    is_public = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="trees")
     skills = relationship("Skill", back_populates="tree", cascade="all, delete-orphan")
@@ -36,7 +41,7 @@ class SkillTree(Base):
 class Skill(Base):
     __tablename__ = "skills"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    tree_id = Column(Integer, ForeignKey("skill_trees.id"), nullable=False)
+    tree_id = Column(Integer, ForeignKey("skill_trees.id"), nullable=False, index=True)
     name = Column(String, nullable=False)
     description = Column(Text, nullable=True)
     category = Column(String, nullable=True)
@@ -55,8 +60,8 @@ class Skill(Base):
 class UserProgress(Base):
     __tablename__ = "user_progress"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=False, index=True)
     current_xp = Column(Integer, default=0)
     status = Column(String, default="locked")
     unlocked_at = Column(DateTime, nullable=True)
@@ -72,8 +77,8 @@ class UserProgress(Base):
 class Activity(Base):
     __tablename__ = "activities"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    skill_id = Column(Integer, ForeignKey("skills.id"), nullable=True, index=True)
     description = Column(Text, nullable=False)
     xp_amount = Column(Integer, default=0)
     source = Column(String, default="manual")
@@ -87,26 +92,14 @@ class Activity(Base):
 class ObsidianLink(Base):
     __tablename__ = "obsidian_links"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     vault_path = Column(String, nullable=False)
     note_title = Column(String, nullable=False)
+    file_path = Column(String, nullable=False)
     tags = Column(Text, default="[]")
+    links = Column(Text, default="[]")
     extracted_activities = Column(Text, default="[]")
+    word_count = Column(Integer, default=0)
     last_sync = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
-
-# Database setup
-engine = create_engine("sqlite:///forge.db", connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def init_db():
-    Base.metadata.create_all(bind=engine)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    user = relationship("User", back_populates="obsidian_links")

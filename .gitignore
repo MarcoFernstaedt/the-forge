@@ -1,1 +1,38 @@
-node_modules/\n__pycache__/\n.env\n*.pyc\n.venv/\ndist/\nbuild/\n.DS_Store\n*.db\n*.sqlite3\n.vscode/\n.idea/\nfrontend/out/\nfrontend/.next/
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Node.js
+node_modules/
+.next/
+frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
