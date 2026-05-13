@@ -33,6 +33,16 @@ export default function TreePage() {
     fetchTree(Number(id));
   }, [id]);
 
+  // Fallback: parse tree ID from URL path for static export
+  useEffect(() => {
+    if (id) return; // Already handled by router
+    if (typeof window === 'undefined') return;
+    const match = window.location.pathname.match(/\/tree\/(\d+)/);
+    if (match) {
+      fetchTree(Number(match[1]));
+    }
+  }, []);
+
   const handleLogActivity = async (skillId: number, description: string, xp: number) => {
     try {
       const result = await api.logActivity(skillId, description, xp);
