@@ -1,6 +1,6 @@
 import {
   User, SkillTree, TreeData, SkillNode, Activity, Stats,
-  ObsidianNote, GraphData
+  ObsidianNote, GraphData, Goal, ProgressNote
 } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
@@ -112,6 +112,27 @@ export const api = {
       body: JSON.stringify({ vault_path: vaultPath }),
     }),
   getGraph: () => request<GraphData>('/api/obsidian/graph'),
+
+  // Goals
+  listGoals: () => request<Goal[]>('/api/goals'),
+  createGoal: (data: Partial<Goal>) =>
+    request<Goal>('/api/goals', { method: 'POST', body: JSON.stringify(data) }),
+  updateGoal: (id: number, data: Partial<Goal>) =>
+    request<Goal>(`/api/goals/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteGoal: (id: number) =>
+    request<{ message: string }>(`/api/goals/${id}`, { method: 'DELETE' }),
+
+  // Progress Notes
+  listProgressNotes: () => request<ProgressNote[]>('/api/notes'),
+  createProgressNote: (data: Partial<ProgressNote>) =>
+    request<ProgressNote>('/api/notes', { method: 'POST', body: JSON.stringify(data) }),
+  deleteProgressNote: (id: number) =>
+    request<{ message: string }>(`/api/notes/${id}`, { method: 'DELETE' }),
+  createVaultNote: (data: { title: string; content: string; tags?: string[]; vault_path?: string }) =>
+    request<{ message: string; file_path: string }>('/api/notes/vault-create', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 };
 
 export { ApiError };

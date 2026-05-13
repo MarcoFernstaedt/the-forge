@@ -98,3 +98,29 @@ export interface GraphData {
   nodes: GraphNode[];
   links: GraphLink[];
 }
+
+export interface Goal {
+  id: number;
+  title: string;
+  description: string | null;
+  category: string | null;
+  target_value: number;
+  current_value: number;
+  status: 'active' | 'completed' | 'paused';
+  target_date: string | null;
+  linked_tree_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProgressNote {
+  id: number;
+  title: string;
+  content: string;
+  tags: string[];
+  linked_skill_id: number | null;
+  linked_tree_id: number | null;
+  mood: string | null;
+  created_at: string;
+  updated_at: string;
+}

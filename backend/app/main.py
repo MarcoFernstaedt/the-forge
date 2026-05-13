@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse, HTMLResponse
 from app.core.config import settings
 from app.core.errors import forge_exception_handler, generic_exception_handler, ForgeError
 from app.models.base import init_db
-from app.api.routes import users, trees, skills, activities, obsidian, stats
+from app.api.routes import users, trees, skills, activities, obsidian, stats, goals, notes
 from app.utils.seed import seed_default_tree
 
 
@@ -50,6 +50,8 @@ app.include_router(skills.router, prefix="/api")
 app.include_router(activities.router, prefix="/api")
 app.include_router(obsidian.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
+app.include_router(goals.router, prefix="/api")
+app.include_router(notes.router, prefix="/api")
 
 # Health check
 @app.get("/health")
@@ -86,6 +88,16 @@ def activities_page():
 @app.get("/login", response_class=HTMLResponse)
 def login_page():
     return serve_html("login")
+
+
+@app.get("/goals", response_class=HTMLResponse)
+def goals_page():
+    return serve_html("goals")
+
+
+@app.get("/notes", response_class=HTMLResponse)
+def notes_page():
+    return serve_html("notes")
 
 
 @app.get("/tree/{tree_id}", response_class=HTMLResponse)

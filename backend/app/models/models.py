@@ -20,6 +20,8 @@ class User(Base):
     progress = relationship("UserProgress", back_populates="user", cascade="all, delete-orphan")
     activities = relationship("Activity", back_populates="user", cascade="all, delete-orphan")
     obsidian_links = relationship("ObsidianLink", back_populates="user", cascade="all, delete-orphan")
+    goals = relationship("Goal", back_populates="user", cascade="all, delete-orphan")
+    progress_notes = relationship("ProgressNote", back_populates="user", cascade="all, delete-orphan")
 
 
 class SkillTree(Base):
@@ -103,3 +105,37 @@ class ObsidianLink(Base):
     last_sync = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="obsidian_links")
+
+
+class Goal(Base):
+    __tablename__ = "goals"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    category = Column(String, nullable=True)
+    target_value = Column(Integer, default=100)
+    current_value = Column(Integer, default=0)
+    status = Column(String, default="active")  # active, completed, paused
+    target_date = Column(DateTime, nullable=True)
+    linked_tree_id = Column(Integer, ForeignKey("skill_trees.id"), nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="goals")
+
+
+class ProgressNote(Base):
+    __tablename__ = "progress_notes"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False)
+    tags = Column(Text, default="[]")
+    linked_skill_id = Column(Integer, ForeignKey("skills.id"), nullable=True)
+    linked_tree_id = Column(Integer, ForeignKey("skill_trees.id"), nullable=True)
+    mood = Column(String, nullable=True)  # great, good, okay, tough
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="progress_notes")

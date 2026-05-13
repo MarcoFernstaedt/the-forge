@@ -158,6 +158,86 @@ class ObsidianGraphOut(BaseModel):
     links: List[ObsidianGraphLink]
 
 
+# --- Goals ---
+class GoalCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
+    category: Optional[str] = Field(None, max_length=50)
+    target_value: int = Field(100, ge=1)
+    current_value: int = Field(0, ge=0)
+    target_date: Optional[datetime] = None
+    linked_tree_id: Optional[int] = None
+
+
+class GoalUpdate(BaseModel):
+    title: Optional[str] = Field(None, min_length=1, max_length=200)
+    description: Optional[str] = Field(None, max_length=1000)
+    category: Optional[str] = None
+    target_value: Optional[int] = Field(None, ge=1)
+    current_value: Optional[int] = Field(None, ge=0)
+    status: Optional[str] = None
+    target_date: Optional[datetime] = None
+    linked_tree_id: Optional[int] = None
+
+
+class GoalOut(BaseModel):
+    id: int
+    title: str
+    description: Optional[str]
+    category: Optional[str]
+    target_value: int
+    current_value: int
+    status: str
+    target_date: Optional[datetime]
+    linked_tree_id: Optional[int]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# --- Progress Notes ---
+class ProgressNoteCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1)
+    tags: List[str] = []
+    linked_skill_id: Optional[int] = None
+    linked_tree_id: Optional[int] = None
+    mood: Optional[str] = None
+
+
+class ProgressNoteOut(BaseModel):
+    id: int
+    title: str
+    content: str
+    tags: List[str]
+    linked_skill_id: Optional[int]
+    linked_tree_id: Optional[int]
+    mood: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+
+    @field_validator('tags', mode='before')
+    @classmethod
+    def parse_tags(cls, v):
+        if isinstance(v, str):
+            import json
+            return json.loads(v)
+        return v
+
+    class Config:
+        from_attributes = True
+
+
+# --- Vault Note Creation ---
+class VaultNoteCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1)
+    tags: List[str] = []
+    vault_path: Optional[str] = None
+
+
 # --- Stats ---
 class StatsOut(BaseModel):
     user: UserOut
