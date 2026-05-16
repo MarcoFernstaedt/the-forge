@@ -5,6 +5,7 @@ import { SkillTree, Stats, Activity, Goal } from '../lib/types';
 import Navbar from '../components/Navbar';
 import LoadingSpinner from '../components/LoadingSpinner';
 import { FadeIn, StaggerContainer, StaggerItem, GlowCard, PulseGlow, XPBar, AnimatedNumber, FloatingParticles, LevelUpFlash } from '../components/animations';
+import { useSoundContext } from '../context/SoundContext';
 
 export default function Dashboard() {
   const [trees, setTrees] = useState<SkillTree[]>([]);
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [newTreeDesc, setNewTreeDesc] = useState('');
   const [creating, setCreating] = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
+  const { playLevelUp, playNavClick } = useSoundContext();
 
   const loadData = async () => {
     try {
@@ -26,6 +28,7 @@ export default function Dashboard() {
       ]);
       if (stats && statsData.current_level > stats.current_level) {
         setShowLevelUp(true);
+        playLevelUp();
         setTimeout(() => setShowLevelUp(false), 3000);
       }
       setTrees(treesData);
@@ -98,19 +101,18 @@ export default function Dashboard() {
   return (
     <div style={{ minHeight: '100vh', background: '#0a0a0c' }}>
       <Navbar />
-      <FloatingParticles count={6} />
       <LevelUpFlash show={showLevelUp} />
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '2rem 1rem', position: 'relative', zIndex: 1 }}>
         <FadeIn>
           <header style={{ marginBottom: '2.5rem' }}>
             <motion.h1
-              style={{ fontSize: '3rem', margin: 0, background: 'linear-gradient(135deg, #b8923c, #f4d77a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 900 }}
+              style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', margin: 0, background: 'linear-gradient(135deg, #b8923c, #f4d77a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontWeight: 900, fontFamily: 'Orbitron, sans-serif', letterSpacing: '-0.01em' }}
               initial={{ opacity: 0, y: -20, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.7, type: 'spring', stiffness: 100 }}
             >
-              The Forge
+              THE FORGE
             </motion.h1>
             <motion.p
               style={{ color: '#c4c4ca', marginTop: '0.4rem', fontSize: '1.0625rem' }}
@@ -126,6 +128,7 @@ export default function Dashboard() {
         {stats && (
           <>
             {/* Level + Streak */}
+            <div data-tour="stats-section">
             <StaggerContainer stagger={0.12} delay={0.15}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginBottom: '1.25rem' }}>
                 <StaggerItem>
@@ -172,10 +175,11 @@ export default function Dashboard() {
                 </StaggerItem>
               </div>
             </StaggerContainer>
+            </div>
 
             {/* Stat Cards */}
             <StaggerContainer stagger={0.08} delay={0.3}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '0.875rem', marginBottom: '2rem' }}>
+              <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.875rem', marginBottom: '2rem' }}>
                 <StaggerItem><StatCard label="Total XP" value={stats.total_xp} color="#b8923c" /></StaggerItem>
                 <StaggerItem><StatCard label="Unlocked" value={stats.skills_unlocked} color="#60a5fa" /></StaggerItem>
                 <StaggerItem><StatCard label="Mastered" value={stats.skills_mastered} color="#f4d77a" /></StaggerItem>
@@ -245,7 +249,7 @@ export default function Dashboard() {
 
         {/* My Trees */}
         <FadeIn delay={0.5}>
-          <section style={{ marginBottom: '3rem' }}>
+          <section data-tour="trees-section" style={{ marginBottom: '3rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
               <h2 style={{ fontSize: '1.25rem', color: '#fff', margin: 0, fontWeight: 700 }}>Skill Trees</h2>
               <motion.button
@@ -287,7 +291,7 @@ export default function Dashboard() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
                   {myTrees.map(tree => (
                     <StaggerItem key={tree.id}>
-                      <a href={`/tree/${tree.id}`} style={{ display: 'block', textDecoration: 'none' }}>
+                      <a href={`/tree/${tree.id}`} onClick={playNavClick} style={{ display: 'block', textDecoration: 'none' }}>
                         <GlowCard style={{ padding: '1.5rem', background: '#111113', border: '1px solid #2a2a2c', borderRadius: 12, height: '100%' }}>
                           <h3 style={{ margin: '0 0 0.5rem', color: '#fff', fontSize: '1.0625rem', fontWeight: 600 }}>{tree.name}</h3>
                           <p style={{ color: '#888', fontSize: '0.875rem', lineHeight: 1.5, margin: '0 0 0.875rem' }}>{tree.description || 'No description'}</p>
@@ -337,7 +341,7 @@ export default function Dashboard() {
 
         {/* Quick Actions */}
         <FadeIn delay={0.6}>
-          <section style={{ marginBottom: '3rem' }}>
+          <section data-tour="quick-actions" style={{ marginBottom: '3rem' }}>
             <h2 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '1rem', fontWeight: 700 }}>Quick Actions</h2>
             <div style={{ display: 'flex', gap: '0.875rem', flexWrap: 'wrap' }}>
               {[

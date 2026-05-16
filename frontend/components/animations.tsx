@@ -165,32 +165,121 @@ export function LevelUpFlash({ show }: { show: boolean }) {
   return (
     <AnimatePresence>
       {show && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.4, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            style={{ position: 'fixed', inset: 0, background: '#b8923c', zIndex: 999, pointerEvents: 'none' }}
+          />
+          <motion.div
+            initial={{ opacity: 0, scale: 0.3, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 1.3, y: -40 }}
+            transition={{ duration: 0.5, type: 'spring', stiffness: 200, damping: 15 }}
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: 1000,
+              background: 'linear-gradient(135deg, #0a0a0c, #1a1200)',
+              border: '2px solid #f4d77a',
+              borderRadius: 20,
+              padding: '2.5rem 4rem',
+              textAlign: 'center',
+              boxShadow: '0 0 80px #b8923c80, inset 0 0 40px #b8923c20',
+            }}
+          >
+            <motion.div animate={{ rotate: [0, 8, -8, 4, -4, 0] }} transition={{ duration: 0.6 }}>
+              <div style={{ fontSize: '3rem', marginBottom: '0.5rem' }}>⚔️</div>
+              <h2 style={{
+                color: '#f4d77a',
+                fontSize: '2.5rem',
+                margin: '0 0 0.25rem',
+                fontWeight: 900,
+                letterSpacing: '-0.02em',
+                textShadow: '0 0 30px #f4d77a80',
+                fontFamily: 'Orbitron, sans-serif',
+              }}>
+                LEVEL UP!
+              </h2>
+              <p style={{ color: '#b8923c', fontSize: '1rem', margin: 0 }}>Your mastery grows stronger</p>
+            </motion.div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+export function ScreenFlash({ color = '#b8923c', show }: { color?: string; show: boolean }) {
+  return (
+    <AnimatePresence>
+      {show && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.5 }}
-          transition={{ duration: 0.6, type: 'spring' }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.5, 0] }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          style={{ position: 'fixed', inset: 0, background: color, zIndex: 998, pointerEvents: 'none' }}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+export function AchievementToast({ title, description, show, icon = '🏆' }: { title: string; description: string; show: boolean; icon?: string }) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0, x: 80, scale: 0.8 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: 80, scale: 0.8 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           style={{
             position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            zIndex: 1000,
-            background: '#0a0a0cee',
-            border: '2px solid #b8923c',
-            borderRadius: 16,
-            padding: '2rem 3rem',
-            textAlign: 'center',
+            bottom: '2rem',
+            right: '1.5rem',
+            background: 'linear-gradient(135deg, #111113, #1a1400)',
+            border: '1px solid #b8923c60',
+            borderRadius: 12,
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.875rem',
+            zIndex: 600,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.5), 0 0 20px #b8923c30',
+            maxWidth: 320,
           }}
         >
-          <motion.div
-            animate={{ rotate: [0, 10, -10, 0] }}
-            transition={{ duration: 0.5, repeat: 2 }}
-          >
-            <h2 style={{ color: '#f4d77a', fontSize: '2rem', margin: 0 }}>LEVEL UP!</h2>
-          </motion.div>
+          <div style={{ fontSize: '1.75rem' }}>{icon}</div>
+          <div>
+            <div style={{ color: '#f4d77a', fontWeight: 700, fontSize: '0.9rem' }}>{title}</div>
+            <div style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.1rem' }}>{description}</div>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+export function HUDNumber({ value, prefix = '' }: { value: number; prefix?: string }) {
+  return (
+    <motion.span
+      key={value}
+      initial={{ opacity: 0, scale: 1.4 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+      style={{
+        display: 'inline-block',
+        fontFamily: 'Orbitron, monospace',
+        letterSpacing: '0.05em',
+      }}
+    >
+      {prefix}{value.toLocaleString()}
+    </motion.span>
   );
 }

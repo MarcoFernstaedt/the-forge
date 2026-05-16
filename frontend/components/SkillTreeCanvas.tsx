@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, forwardRef, useImperativeHandle } from 'react';
 
 interface SkillNode {
   id: number;
@@ -28,6 +28,13 @@ interface Particle {
   size: number;
 }
 
+export interface SkillTreeCanvasHandle {
+  zoomIn: () => void;
+  zoomOut: () => void;
+  resetCamera: () => void;
+  selectNodeByName: (name: string) => void;
+}
+
 interface SkillTreeCanvasProps {
   skills: SkillNode[];
   onNodeClick: (skill: SkillNode) => void;
@@ -55,13 +62,13 @@ const COLORS = {
   },
 };
 
-export default function SkillTreeCanvas({
+const SkillTreeCanvas = forwardRef<SkillTreeCanvasHandle, SkillTreeCanvasProps>(function SkillTreeCanvas({
   skills,
   onNodeClick,
   onNodeHover,
   width = 1200,
   height = 800,
-}: SkillTreeCanvasProps) {
+}, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [particles, setParticles] = useState<Particle[]>([]);
@@ -384,6 +391,72 @@ export default function SkillTreeCanvas({
     }));
   };
 
+  // Expose camera controls via ref
+  useImperativeHandle(ref, () => ({
+    zoomIn: () => setCamera(prev => ({ ...prev, zoom: Math.min(3, prev.zoom * 1.3) })),
+    zoomOut: () => setCamera(prev => ({ ...prev, zoom: Math.max(0.3, prev.zoom * 0.77) })),
+    resetCamera: () => setCamera({ x: 0, y: 0, zoom: 1 }),
+    selectNodeByName: (name: string) => {
+      const lower = name.toLowerCase();
+      const node = skillsRef.current.find(s => s.name.toLowerCase().includes(lower));
+      if (node) {
+        setSelectedNode(node.id);
+        onNodeClick(node);
+        setCamera(prev => ({
+          ...prev,
+          x: width / 2 - node.x * width * prev.zoom,
+          y: height / 2 - node.y * height * prev.zoom,
+        }));
+      }
+    },
+  }), [onNodeClick, width, height]);
+
+  // Touch handlers
+  const touchState = useRef<{ type: 'drag' | 'pinch'; startX: number; startY: number; startDist: number; startZoom: number; camStart: { x: number; y: number } }>({ type: 'drag', startX: 0, startY: 0, startDist: 0, startZoom: 1, camStart: { x: 0, y: 0 } });
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length === 1) {
+      const t = e.touches[0];
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = t.clientX - rect.left;
+      const y = t.clientY - rect.top;
+      const node = getNodeAtPosition(x, y);
+      if (node) {
+        setSelectedNode(node.id);
+        onNodeClick(node);
+        return;
+      }
+      touchState.current = { type: 'drag', startX: t.clientX, startY: t.clientY, startDist: 0, startZoom: camera.zoom, camStart: { ...camera } };
+    } else if (e.touches.length === 2) {
+      const dx = e.touches[1].clientX - e.touches[0].clientX;
+      const dy = e.touches[1].clientY - e.touches[0].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      touchState.current = { type: 'pinch', startX: 0, startY: 0, startDist: dist, startZoom: camera.zoom, camStart: { ...camera } };
+    }
+  }, [camera, getNodeAtPosition, onNodeClick]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && touchState.current.type === 'drag') {
+      const t = e.touches[0];
+      const dx = t.clientX - touchState.current.startX;
+      const dy = t.clientY - touchState.current.startY;
+      setCamera(prev => ({ ...prev, x: touchState.current.camStart.x + dx, y: touchState.current.camStart.y + dy }));
+    } else if (e.touches.length === 2 && touchState.current.type === 'pinch') {
+      const dx = e.touches[1].clientX - e.touches[0].clientX;
+      const dy = e.touches[1].clientY - e.touches[0].clientY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const scale = dist / touchState.current.startDist;
+      const newZoom = Math.max(0.3, Math.min(3, touchState.current.startZoom * scale));
+      setCamera(prev => ({ ...prev, zoom: newZoom }));
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    touchState.current.type = 'drag';
+  }, []);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -462,15 +535,21 @@ export default function SkillTreeCanvas({
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onWheel={handleWheel}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         style={{
           width: '100%',
           height: '100%',
           cursor: 'grab',
           display: 'block',
+          touchAction: 'none',
         }}
         tabIndex={0}
         aria-label="Interactive skill tree. Use mouse to pan and zoom. Tab to navigate nodes with keyboard."
       />
     </div>
   );
-}
+});
+
+export default SkillTreeCanvas;
