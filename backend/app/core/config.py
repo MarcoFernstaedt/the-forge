@@ -19,7 +19,7 @@ class Settings:
     CORS_ORIGINS: List[str] = os.getenv("CORS_ORIGINS", "*").split(",")
 
     # Obsidian
-    DEFAULT_VAULT_PATH: str = os.getenv("DEFAULT_VAULT_PATH", "/home/marco/obsidian-vault")
+    DEFAULT_VAULT_PATH: str = os.getenv("DEFAULT_VAULT_PATH", "./data/obsidian-vault")
 
     # XP / Game
     BASE_LEVEL_XP: int = 100

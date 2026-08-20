@@ -65,7 +65,7 @@ frontend/
 | `DATABASE_URL` | `sqlite:///data/forge.db` | Database connection |
 | `FORGE_DEV_MODE` | `true` | Auto-create default user, skip API key |
 | `CORS_ORIGINS` | `*` | Comma-separated allowed origins |
-| `DEFAULT_VAULT_PATH` | `/home/marco/obsidian-vault` | Default Obsidian vault |
+| `DEFAULT_VAULT_PATH` | `./data/obsidian-vault` | Default Obsidian vault |
 
 ## API Endpoints
 
