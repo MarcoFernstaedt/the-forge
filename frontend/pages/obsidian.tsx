@@ -13,7 +13,7 @@ export default function ObsidianPage() {
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState('');
-  const [vaultPath, setVaultPath] = useState('/home/marco/obsidian-vault');
+  const [vaultPath, setVaultPath] = useState('./data/obsidian-vault');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [showCreateNote, setShowCreateNote] = useState(false);
